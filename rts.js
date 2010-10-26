@@ -1,12 +1,23 @@
-function eval( x ) {
-    while ( x && x.eOrV ) {
-        if ( typeof x.eOrV == 'function' ) {
-            x = x.eOrV() ;
-        } else {
-            x = x.eOrV ;
-        }
-    }
-    return x ;
+function ev( x ) {
+	if ( x !== undefined && x.eOrV !== undefined ) {
+		var x_upd = x ;
+		do {
+			if ( typeof x.eOrV == 'function' ) {
+				var xx = x.eOrV() ;
+				x.eOrV = xx ;
+				x = xx ;
+			} else {
+				x = x.eOrV ;
+			}
+		}
+		while ( x !== undefined && x.eOrV !== undefined ) ;
+		while ( x_upd.eOrV !== undefined ) {
+			var x_next = x_upd.eOrV ;
+			x_upd.eOrV = x ;
+			x_upd = x_next ;
+		}
+	}
+	return x ;
 }
 
 // Apply node, not enough args
@@ -18,7 +29,7 @@ AppLT.prototype = {
         } else if ( args.length == needs ) {
             return this.fun.applyN( this.args.concat( args ) ) ;
         } else {
-            var fun = eval( this.applyN( args.slice( 0, needs ) ) ) ;
+            var fun = ev( this.applyN( args.slice( 0, needs ) ) ) ;
             return {
                 eOrV : function() {
                     return fun.applyN( args.slice( needs ) ) ;
@@ -38,7 +49,7 @@ function AppLT( fun, args ) {
 // Apply node, unknown how much is missing or too much
 App.prototype = {
     applyN : function ( args ) {
-        var fun = eval(this) ;
+        var fun = ev(this) ;
         return {
             eOrV : function() {
                 return fun.applyN( args ) ;
@@ -47,10 +58,7 @@ App.prototype = {
 }
 function App( fun, args ) {
     this.eOrV = function() {
-        // var x = eval( fun.applyN( args ) ) ;
-        var x = ( fun.applyN( args ) ) ;
-        this.eOrV = x ;
-        return x ;
+        return fun.applyN( args ) ;
     }
 }
 
@@ -63,7 +71,7 @@ Fun.prototype = {
             var x = this.fun.apply( null, args ) ;
             return x ;
         } else {
-            var fun = eval( this.fun.apply( null, args.slice( 0, this.needs ) ) ) ;
+            var fun = ev( this.fun.apply( null, args.slice( 0, this.needs ) ) ) ;
             var remargs = args.slice( this.needs ) ;
             return {
                 eOrV : function() {
@@ -105,27 +113,27 @@ function fun(f) {
 //]
 // strict application wrappers
 function eval1(f,a) {
-    return eval( f.applyN([a]) ) ;
+    return ev( f.applyN([a]) ) ;
 }
 
 function eval2(f,a,b) {
-    return eval( f.applyN([a,b]) ) ;
+    return ev( f.applyN([a,b]) ) ;
 }
 
 function _e3_(f,a,b,c) {
-    return eval( f.applyN([a,b,c]) ) ;
+    return ev( f.applyN([a,b,c]) ) ;
 }
 
 function _e4_(f,a,b,c,d) {
-    return eval( f.applyN([a,b,c,d]) ) ;
+    return ev( f.applyN([a,b,c,d]) ) ;
 }
 
 function _e5_(f,a,b,c,d,e) {
-    return eval( f.applyN([a,b,c,d,e]) ) ;
+    return ev( f.applyN([a,b,c,d,e]) ) ;
 }
 
 function _eN_(f,a) {
-    return eval( f.applyN(a) ) ;
+    return ev( f.applyN(a) ) ;
 }
 
 //[8
@@ -182,15 +190,15 @@ function isNil(x) { return x[0] == 1 ; }
 
 
 function show( x ) {
-    var x = eval(x) ;
-    document.write( ""+eval(x) ) ;
+    var x = ev(x) ;
+    document.write( ""+ev(x) ) ;
 }
 
 function showList( l ) {
-    var list = eval(l) ;
+    var list = ev(l) ;
     switch (list[0]) {
         case 0 :
-            document.write( eval(head(list)) + ":" ) ;
+            document.write( ev(head(list)) + ":" ) ;
             showList( tail(list) ) ;
             break ;
         case 1 :
@@ -210,34 +218,34 @@ function testSieve() {
         return app2( eq, app2( mod, a, 2 ), 0 ) ;
     } ) ;
     var eq = fun( function(a,b) {
-        return eval(a) == eval(b) ;
+        return ev(a) == ev(b) ;
     } ) ;
     var ne = fun( function(a,b) {
-        return eval(a) != eval(b) ;
+        return ev(a) != ev(b) ;
     } ) ;
     var add = fun( function(a,b) {
-        return eval(a) + eval(b) ;
+        return ev(a) + ev(b) ;
     } ) ;
     var sub = fun( function(a,b) {
-        return eval(a) - eval(b) ;
+        return ev(a) - ev(b) ;
     } ) ;
     var mul = fun( function(a,b) {
-        return eval(a) * eval(b) ;
+        return ev(a) * ev(b) ;
     } ) ;
     var div = fun( function(a,b) {
-        return Math.floor ( eval(a) / eval(b) ) ;
+        return Math.floor ( ev(a) / ev(b) ) ;
     } ) ;
     var mod = fun( function(a,b) {
-        return ( eval(a) % eval(b) ) ;
+        return ( ev(a) % ev(b) ) ;
     } ) ;
     var from = fun( function(a) {
         return cons( a, app1( from, app2( add, a, 1 ) ) ) ;
     } ) ;
     var last = fun( function(a) {
-        var list = eval(a) ;
+        var list = ev(a) ;
         switch (list[0]) {
             case 0 :
-                var list2 = eval(tail(list)) ;
+                var list2 = ev(tail(list)) ;
                 switch (list2[0]) {
                     case 0 :
                         return app1( last, tail(list) ) ;
@@ -249,8 +257,8 @@ function testSieve() {
         }
     } ) ;
     var take = fun( function(a,b) {
-        var len  = eval(a) ;
-        var list = eval(b) ;
+        var len  = ev(a) ;
+        var list = ev(b) ;
         if ( len <= 0 || isNil(list) ) {
             return nil ;
         } else {
@@ -258,7 +266,7 @@ function testSieve() {
         }
     } ) ;
     var filter = fun( function(a,b) {
-        var list = eval(b) ;
+        var list = ev(b) ;
         var test = eval1( a, head(list) ) ;
         if ( test ) {
             return cons( head(list), app2( filter, a, tail(list) ) ) ;
@@ -270,20 +278,24 @@ function testSieve() {
         return app2( ne, app2( mul, app2( div, b, a), a ), b ) ;
     } ) ;
     var notMultiple2 = fun( function(a,b) {
-        var x = eval(a) ;
-        var y = eval(b) ;
-        return (Math.floor(y / x) * x) != y ;
+        var x = ev(a) ;
+        var y = ev(b) ;
+        // return (Math.floor(y / x) * x) != y ;
+        return y % x != 0 ;
     } ) ;
     var sieve = fun( function(a) {
-        var list = eval(a) ;
+        var list = ev(a) ;
         return cons( head(list), app1( sieve, app2( filter, app1( notMultiple2, head(list) ), tail(list) ) ) ) ;
     } ) ;
     var sieve2 = fun( function(nmz,a) {
-        var list = eval(a) ;
+        var list = ev(a) ;
         return cons( head(list), app2( sieve2, app1( id, nmz ), app2( filter, app1( nmz, head(list) ), tail(list) ) ) ) ;
     } ) ;
-    var mainSieve = app2( take, 1000, app1( sieve, app1( from, 2 ) ) ) ;
+    // Firefox: 400 (not more, because of to deep recursion)
+    // Chrome: 1000
+    var mainSieve = app2( take, 400, app1( sieve, app1( from, 2 ) ) ) ;
     var mainSieve2 = app2( take, 500, app2( sieve2, app1( id, notMultiple2 ), app1( from, 2 ) ) ) ;
+    var testInf = app2( filter, app1( eq, 0 ), app1( from, 2 ) ) ;
     
     // running it...
     evalCounter = 0 ;
@@ -298,9 +310,9 @@ function testSieve() {
 
 function testMisc()  {
     trace("load & init ok") ;
-    var plus = fun( function(a,b){return eval(a)+eval(b);}) ;
+    var plus = fun( function(a,b){return ev(a)+ev(b);}) ;
     trace("plus: " + plus) ;
-    var inc1 = fun( function(a){trace("inc: " + a) ; var x = eval(a) ; return x+1;}) ;
+    var inc1 = fun( function(a){trace("inc: " + a) ; var x = ev(a) ; return x+1;}) ;
     trace("inc1: " + inc1) ;
     var inc2 = plus.applyN([10]) ;
     trace("inc2: " + inc2) ;
@@ -310,15 +322,15 @@ function testMisc()  {
     var arr = [two1] ;
     // trace("two2: " + two2) ;
     trace("two3: " + two3) ;
-    trace("two3 eval: " + eval(two3)) ;
+    trace("two3 eval: " + ev(two3)) ;
     trace("two3: " + two3) ;
-    trace("two3 eval: " + eval(two3)) ;
+    trace("two3 eval: " + ev(two3)) ;
     trace("arr: " + arr) ;
     var x1 = inc2.applyN( arr ) ;
     trace("inc 2: " + x1) ;
     var x2 = new App( inc2, arr ) ;
     trace("inc del 2: " + x2) ;
-    trace("inc del 2 eval: " + eval(x2)) ;
+    trace("inc del 2 eval: " + ev(x2)) ;
 }
 
 function tryOut() {
