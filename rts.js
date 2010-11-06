@@ -1,23 +1,23 @@
 function ev( x ) {
-	if ( x !== undefined && x.eOrV !== undefined ) {
-		var x_upd = x ;
-		do {
-			if ( typeof x.eOrV == 'function' ) {
-				var xx = x.eOrV() ;
-				x.eOrV = xx ;
-				x = xx ;
-			} else {
-				x = x.eOrV ;
-			}
-		}
-		while ( x !== undefined && x.eOrV !== undefined ) ;
-		while ( x_upd.eOrV !== undefined ) {
-			var x_next = x_upd.eOrV ;
-			x_upd.eOrV = x ;
-			x_upd = x_next ;
-		}
-	}
-	return x ;
+    if ( x !== undefined && x.eOrV !== undefined ) {
+        var x_upd = x ;
+        do {
+            if ( typeof x.eOrV == 'function' ) {
+                var xx = x.eOrV() ;
+                x.eOrV = xx ;
+                x = xx ;
+            } else {
+                x = x.eOrV ;
+            }
+        }
+        while ( x !== undefined && x.eOrV !== undefined ) ;
+        while ( x_upd.eOrV !== undefined ) {
+            var x_next = x_upd.eOrV ;
+            x_upd.eOrV = x ;
+            x_upd = x_next ;
+        }
+    }
+    return x ;
 }
 
 // Apply node, not enough args
